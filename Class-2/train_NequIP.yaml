@@ -1,0 +1,63 @@
+CUTOFF: 3.7 # in Å
+PATH_TRAIN: train.xyz
+PATH_TEST: test.xyz
+PATH_VALID: valid.xyz
+general:
+    progress: logged
+
+# train a lightweight SchNet model ...
+model:
+    offset:
+        # note the "+" prefix syntax: refer to the
+        # data2objects package for more details
+        +FixedOffset: { C: -148.314002 }
+    many-body:
+        +NequIP:
+            elements: [C]
+            cutoff: =/CUTOFF # reference the radial cutoff defined above
+            features:
+                channels: [16, 8, 4]
+                l_max: 2
+                use_odd_parity: true 
+            layers: 2
+            self_interaction: linear
+
+# ... on structures from local files ...
+data:
+    train:
+            path: =/PATH_TRAIN
+            n: 1200 # number of structures to use
+            shuffle: true
+            cutoff: =/CUTOFF
+    valid: 
+            path: =/PATH_VALID
+            cutoff: =/CUTOFF
+    test: 
+            path: =/PATH_TEST
+            cutoff: =/CUTOFF
+
+# ... on both energy and forces (weighted 1:1) ...
+loss:
+    - +PerAtomEnergyLoss()
+    - +ForceRMSE()
+
+# ... with the following settings ...
+fitting:
+    trainer_kwargs:
+        max_epochs: 250
+        accelerator: auto 
+        check_val_every_n_epoch: 1
+
+    optimizer:
+            name: AdamW
+            lr: 0.01
+
+    scheduler:
+            name: ReduceLROnPlateau
+            factor: 0.5
+            patience: 10
+
+    loader_kwargs:
+        batch_size: 16
+
+wandb: null

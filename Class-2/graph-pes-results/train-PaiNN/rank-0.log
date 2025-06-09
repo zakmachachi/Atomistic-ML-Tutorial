@@ -1,0 +1,285 @@
+[graph-pes INFO]: Logging to graph-pes-results/train-PaiNN/rank-0.log
+[graph-pes INFO]: ID for this training run: train-PaiNN
+[graph-pes INFO]: 
+Output for this training run can be found at:
+   └─ graph-pes-results/train-PaiNN
+      ├─ rank-0.log         # find a verbose log here
+      ├─ model.pt           # the best model (according to valid/loss/total)
+      ├─ lammps_model.pt    # the best model deployed to LAMMPS
+      ├─ train-config.yaml  # the complete config used for this run
+      └─ summary.yaml       # the summary of the training run
+
+[graph-pes DEBUG]: Using high precision for float32 matrix multiplications.
+[graph-pes DEBUG]: Using float32 as default dtype.
+[graph-pes DEBUG]: Using seed 42 for reproducibility.
+[graph-pes DEBUG]: Logging using <pytorch_lightning.loggers.csv_logs.CSVLogger object at 0x7f43f29f9990>
+[graph-pes DEBUG]: Callbacks: [OffsetLogger(root=graph-pes-results/train-PaiNN), ScalesLogger(root=graph-pes-results/train-PaiNN), <graph_pes.training.callbacks.ModelTimer object at 0x7f43f29f9bd0>, SaveBestModel(root=graph-pes-results/train-PaiNN), <graph_pes.training.callbacks.LoggedProgressBar object at 0x7f43f29f99f0>, <pytorch_lightning.callbacks.lr_monitor.LearningRateMonitor object at 0x7f43f29f9900>, <pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f43f29faf50>, <pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f43f29f9e70>]
+[graph-pes DEBUG]: 
+Model:
+AdditionModel(
+  offset=FixedOffset({'C': -148.0}, trainable=False),
+  many-body=PaiNN(
+    (z_embedding): PerElementEmbedding(dim=16, elements=[])
+    (interactions): UniformModuleList(
+      (0-2): 3 x Interaction(
+        (filter_generator): HaddamardProduct(
+          (components): ModuleList(
+            (0): Sequential(
+              (0): Bessel(n_features=15, cutoff=3.7, trainable=True)
+              (1): Linear(in_features=15, out_features=48, bias=True)
+            )
+            (1): PolynomialEnvelope(cutoff=3.7, p=6)
+          )
+        )
+        (Phi): MLP(16 → 16 → 48, activation=SiLU())
+      )
+    )
+    (updates): UniformModuleList(
+      (0-2): 3 x Update(
+        (U): VectorLinear(
+          (_linear): Linear(in_features=16, out_features=16, bias=False)
+        )
+        (V): VectorLinear(
+          (_linear): Linear(in_features=16, out_features=16, bias=False)
+        )
+        (mlp): MLP(32 → 16 → 48, activation=SiLU())
+      )
+    )
+    (read_out): MLP(16 → 16 → 1, activation=SiLU())
+    (scaler): LocalEnergiesScaler(trainable=True)
+  )
+)
+
+[graph-pes DEBUG]: 
+Data:
+DatasetCollection(
+  train=ASEToGraphDataset(436, properties=['forces', 'energy']),
+  valid=ASEToGraphDataset(54, properties=['forces', 'energy']),
+  test=ASEToGraphDataset(54, properties=['forces', 'energy'])
+)
+
+[graph-pes DEBUG]: 
+Optimizer:
+Optimizer(name="AdamW", lr=0.01)
+
+[graph-pes DEBUG]: 
+Scheduler:
+LRScheduler(
+  name="ReduceLROnPlateau",
+  factor=0.5,
+  patience=10
+)
+
+[graph-pes DEBUG]: 
+Total loss:
+TotalLoss:
+PerAtomEnergyLoss("energy", metric=RMSE())
+ForceRMSE("forces", metric=RMSE())
+
+[graph-pes INFO]: Preparing data
+[graph-pes INFO]: Caching neighbour lists for 436 structures with cutoff 3.700000047683716, property mapping None and torch dtype torch.float32
+[graph-pes INFO]: Setting up datasets
+[graph-pes INFO]: Pre-fitting the model on 436 samples
+[graph-pes DEBUG]: Attempting to pre-fit FixedOffset
+[graph-pes DEBUG]: Attempting to pre-fit PaiNN
+[graph-pes DEBUG]: Per-element means: {6: -157.91651916503906}
+[graph-pes DEBUG]: Per-element variances: {6: 5.720173358917236}
+[graph-pes DEBUG]: 
+Model:
+AdditionModel(
+  offset=FixedOffset({'C': -148.0}, trainable=False),
+  many-body=PaiNN(
+    (z_embedding): PerElementEmbedding(dim=16, elements=['C'])
+    (interactions): UniformModuleList(
+      (0-2): 3 x Interaction(
+        (filter_generator): HaddamardProduct(
+          (components): ModuleList(
+            (0): Sequential(
+              (0): Bessel(n_features=15, cutoff=3.7, trainable=True)
+              (1): Linear(in_features=15, out_features=48, bias=True)
+            )
+            (1): PolynomialEnvelope(cutoff=3.7, p=6)
+          )
+        )
+        (Phi): MLP(16 → 16 → 48, activation=SiLU())
+      )
+    )
+    (updates): UniformModuleList(
+      (0-2): 3 x Update(
+        (U): VectorLinear(
+          (_linear): Linear(in_features=16, out_features=16, bias=False)
+        )
+        (V): VectorLinear(
+          (_linear): Linear(in_features=16, out_features=16, bias=False)
+        )
+        (mlp): MLP(32 → 16 → 48, activation=SiLU())
+      )
+    )
+    (read_out): MLP(16 → 16 → 1, activation=SiLU())
+    (scaler): LocalEnergiesScaler({'C': 2.39}, trainable=True)
+  )
+)
+
+[graph-pes INFO]: 
+Number of learnable params:
+    offset (FixedOffset): 0
+    many-body (PaiNN)   : 11,487
+
+[graph-pes INFO]: Sanity checking the model...
+[graph-pes INFO]: Starting fit...
+[graph-pes DEBUG]: 
+Using LR scheduler config:
+{'interval': 'epoch', 'frequency': 1, 'monitor': 'valid/loss/total', 'strict': True}
+
+[graph-pes DEBUG]: New best model: validation loss 9.60590648651123
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 1.4863930940628052
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 1.414515495300293
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.925027072429657
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.7495203614234924
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.7074542045593262
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.6338184475898743
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5839571356773376
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5467371344566345
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5393425226211548
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5157579183578491
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5064570903778076
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5045005083084106
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4940773546695709
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4875987768173218
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4747970402240753
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4663756787776947
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4648175537586212
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.45596498250961304
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4429958760738373
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4416339695453644
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4360273778438568
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4356054365634918
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.43390682339668274
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.43358007073402405
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.43341735005378723
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.43041080236434937
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4294887185096741
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.42828115820884705
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.42787012457847595
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.42325061559677124
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.42125242948532104
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.42084428668022156
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4200279414653778
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4199221432209015
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41941726207733154
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41899344325065613
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4189523160457611
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41874104738235474
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4184718728065491
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.418254017829895
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41815871000289917
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4179742932319641
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41780364513397217
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41777899861335754
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4176715910434723
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.41760292649269104
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4174705147743225
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4174276888370514
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-PaiNN/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-PaiNN/lammps_model.pt
+[graph-pes INFO]: Loading best weights from "/home/vld-gpu01/vld/sedm6197/Atomistic-ML-Tutorial/Class-2/graph-pes-results/train-PaiNN/checkpoints/best.ckpt"
+[graph-pes INFO]: Training complete.
+[graph-pes INFO]: Testing best model...
+[graph-pes INFO]: Testing complete.
+[graph-pes INFO]: Awaiting final Lightning and W&B shutdown...

@@ -1,0 +1,67 @@
+CUTOFF: 3.7
+PATH_TEST: structures_filt_test.xyz
+PATH_TRAIN: structures_filt_train.xyz
+PATH_VALID: structures_filt_valid.xyz
+data:
+  test: structures_filt_test.xyz
+  train:
+    n: null
+    path: structures_filt_train.xyz
+    shuffle: false
+  valid: structures_filt_valid.xyz
+fitting:
+  auto_fit_reference_energies: false
+  callbacks: []
+  early_stopping: null
+  early_stopping_patience: null
+  loader_kwargs:
+    batch_size: 16
+    num_workers: 1
+    persistent_workers: true
+    pin_memory: false
+  max_n_pre_fit: 5000
+  optimizer:
+    lr: 0.01
+    name: AdamW
+  pre_fit_model: true
+  scheduler:
+    factor: 0.5
+    name: ReduceLROnPlateau
+    patience: 10
+  swa: null
+  trainer_kwargs:
+    accelerator: auto
+    check_val_every_n_epoch: 1
+    enable_model_summary: false
+    max_epochs: 250
+general:
+  log_level: INFO
+  progress: logged
+  root_dir: graph-pes-results
+  run_id: train-PaiNN
+  seed: 42
+  torch:
+    dtype: float32
+    float32_matmul_precision: high
+lammps_model_path: !!python/object/apply:pathlib.PosixPath
+- graph-pes-results
+- train-PaiNN
+- lammps_model.pt
+loss:
+- +PerAtomEnergyLoss()
+- +ForceRMSE()
+model:
+  many-body:
+    +PaiNN:
+      channels: 16
+      cutoff: 3.7
+      layers: 3
+      radial_features: 15
+  offset:
+    +FixedOffset:
+      C: -148.314002
+model_path: !!python/object/apply:pathlib.PosixPath
+- graph-pes-results
+- train-PaiNN
+- model.pt
+wandb: null

@@ -1,0 +1,80 @@
+CUTOFF: 3.7
+PATH_TEST: test.xyz
+PATH_TRAIN: train.xyz
+PATH_VALID: valid.xyz
+data:
+  test:
+    cutoff: 3.7
+    path: test.xyz
+  train:
+    cutoff: 3.7
+    n: 1200
+    path: train.xyz
+    shuffle: true
+  valid:
+    cutoff: 3.7
+    path: valid.xyz
+fitting:
+  auto_fit_reference_energies: false
+  callbacks: []
+  early_stopping: null
+  early_stopping_patience: null
+  loader_kwargs:
+    batch_size: 16
+    num_workers: 1
+    persistent_workers: true
+    pin_memory: false
+  max_n_pre_fit: 5000
+  optimizer:
+    lr: 0.01
+    name: AdamW
+  pre_fit_model: true
+  scheduler:
+    factor: 0.5
+    name: ReduceLROnPlateau
+    patience: 10
+  swa: null
+  trainer_kwargs:
+    accelerator: auto
+    check_val_every_n_epoch: 1
+    enable_model_summary: false
+    max_epochs: 250
+general:
+  log_level: INFO
+  progress: logged
+  root_dir: graph-pes-results
+  run_id: train-NequiP
+  seed: 42
+  torch:
+    dtype: float32
+    float32_matmul_precision: high
+lammps_model_path: !!python/object/apply:pathlib.PosixPath
+- graph-pes-results
+- train-NequiP
+- lammps_model.pt
+loss:
+- +PerAtomEnergyLoss()
+- +ForceRMSE()
+model:
+  many-body:
+    +NequIP:
+      cutoff: 3.7
+      elements:
+      - C
+      features:
+        channels:
+        - 16
+        - 8
+        - 4
+        l_max: 2
+        use_odd_parity: true
+      layers: 2
+      self_interaction: linear
+  offset:
+    +FixedOffset:
+      C: -148.314002
+model_path: !!python/object/apply:pathlib.PosixPath
+- graph-pes-results
+- train-NequiP
+- model.pt
+wandb: null

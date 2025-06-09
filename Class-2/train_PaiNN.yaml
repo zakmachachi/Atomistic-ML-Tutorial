@@ -1,0 +1,55 @@
+# define a radial cutoff to use throughout the config
+CUTOFF: 3.7 # in Å
+PATH_TRAIN: structures_filt_train.xyz
+PATH_TEST: structures_filt_test.xyz
+PATH_VALID: structures_filt_valid.xyz
+general:
+    progress: logged
+
+# train a lightweight SchNet model ...
+model:
+    offset:
+        # note the "+" prefix syntax: refer to the
+        # data2objects package for more details
+        +FixedOffset: { C: -148.314002 }
+    many-body:
+        +PaiNN:
+            cutoff: =/CUTOFF # reference the radial cutoff defined above
+            channels: 16
+            radial_features: 15
+            layers: 3
+
+# ... on structures from local files ...
+data:
+    train:
+        path: =/PATH_TRAIN
+        n: ## number of structures to use
+        shuffle: false
+    valid: =/PATH_VALID
+    test: =/PATH_TEST
+
+# ... on both energy and forces (weighted 1:1) ...
+loss:
+    - +PerAtomEnergyLoss()
+    - +ForceRMSE()
+
+# ... with the following settings ...
+fitting:
+    trainer_kwargs:
+        max_epochs: 250
+        accelerator: auto
+        check_val_every_n_epoch: 1
+
+    optimizer:
+        name: AdamW
+        lr: 0.01
+
+    scheduler:
+        name: ReduceLROnPlateau
+        factor: 0.5
+        patience: 10
+
+    loader_kwargs:
+        batch_size: 16
+
+wandb: null

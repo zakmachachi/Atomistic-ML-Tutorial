@@ -1,0 +1,308 @@
+[graph-pes INFO]: Logging to graph-pes-results/train-NequiP/rank-0.log
+[graph-pes INFO]: ID for this training run: train-NequiP
+[graph-pes INFO]: 
+Output for this training run can be found at:
+   └─ graph-pes-results/train-NequiP
+      ├─ rank-0.log         # find a verbose log here
+      ├─ model.pt           # the best model (according to valid/loss/total)
+      ├─ lammps_model.pt    # the best model deployed to LAMMPS
+      ├─ train-config.yaml  # the complete config used for this run
+      └─ summary.yaml       # the summary of the training run
+
+[graph-pes DEBUG]: Using high precision for float32 matrix multiplications.
+[graph-pes DEBUG]: Using float32 as default dtype.
+[graph-pes DEBUG]: Using seed 42 for reproducibility.
+[graph-pes DEBUG]: Logging using <pytorch_lightning.loggers.csv_logs.CSVLogger object at 0x7f46c1afba60>
+[graph-pes DEBUG]: Callbacks: [OffsetLogger(root=graph-pes-results/train-NequiP), ScalesLogger(root=graph-pes-results/train-NequiP), <graph_pes.training.callbacks.ModelTimer object at 0x7f46c1af9180>, SaveBestModel(root=graph-pes-results/train-NequiP), <graph_pes.training.callbacks.LoggedProgressBar object at 0x7f46c1afa140>, <pytorch_lightning.callbacks.lr_monitor.LearningRateMonitor object at 0x7f46c1afb9d0>, <pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f46c1aface0>, <pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f46c1af8f70>]
+[graph-pes DEBUG]: 
+Model:
+AdditionModel(
+  offset=FixedOffset({'C': -148.0}, trainable=False),
+  many-body=NequIP(
+    (Z_embedding): AtomicOneHot(elements=['C'])
+    (initial_node_embedding): PerElementEmbedding(dim=16, elements=[])
+    (edge_embedding): SphericalHarmonics(1x1o -> 1x0e+1x1o+1x2e)
+    (layers): UniformModuleList(
+      (0): NequIPMessagePassingLayer(
+        (pre_message_linear): Linear(16x0e -> 16x0e | 256 weights)
+        (message_tensor_product): TensorProduct(16x0e x 1x0e+1x1o+1x2e -> 16x0e+16x1o+16x2e | 48 paths | 48 weights)
+        (weight_generator): HaddamardProduct(
+          (components): ModuleList(
+            (0): Sequential(
+              (0): Bessel(n_features=8, cutoff=3.7, trainable=True)
+              (1): MLP(8 → 8 → 8 → 48, activation=SiLU())
+            )
+            (1): PolynomialEnvelope(cutoff=3.7, p=6)
+          )
+        )
+        (aggregation): SumNeighbours()
+        (non_linearity): Gate (28x0e+8x1o+4x2e -> 16x0e+8x1o+4x2e)
+        (post_message_linear): Linear(16x0e+16x1o+16x2e -> 28x0e+8x1o+4x2e | 640 weights)
+        (self_interaction): LinearSelfInteraction(
+          (linear): Linear(16x0e -> 28x0e+8x1o+4x2e | 448 weights)
+        )
+      )
+      (1): NequIPMessagePassingLayer(
+        (pre_message_linear): Linear(16x0e+8x1o+4x2e -> 16x0e+8x1o+4x2e | 336 weights)
+        (message_tensor_product): TensorProduct(16x0e+8x1o+4x2e x 1x0e+1x1o+1x2e -> 28x0e+36x1o+12x1e+12x2o+32x2e | 120 paths | 120 weights)
+        (weight_generator): HaddamardProduct(
+          (components): ModuleList(
+            (0): Sequential(
+              (0): Bessel(n_features=8, cutoff=3.7, trainable=True)
+              (1): MLP(8 → 8 → 8 → 120, activation=SiLU())
+            )
+            (1): PolynomialEnvelope(cutoff=3.7, p=6)
+          )
+        )
+        (aggregation): SumNeighbours()
+        (non_linearity): Gate (16x0e -> 16x0e)
+        (post_message_linear): Linear(28x0e+36x1o+12x1e+12x2o+32x2e -> 16x0e | 448 weights)
+        (self_interaction): LinearSelfInteraction(
+          (linear): Linear(16x0e+8x1o+4x2e -> 16x0e | 256 weights)
+        )
+      )
+    )
+    (energy_readout): LinearReadOut(16x0e -> 1x0e | 16 weights)
+    (scaler): LocalEnergiesScaler(trainable=True)
+  )
+)
+
+[graph-pes DEBUG]: 
+Data:
+DatasetCollection(
+  train=ASEToGraphDataset(436, properties=['forces', 'energy']),
+  valid=ASEToGraphDataset(54, properties=['forces', 'energy']),
+  test=ASEToGraphDataset(54, properties=['forces', 'energy'])
+)
+
+[graph-pes DEBUG]: 
+Optimizer:
+Optimizer(name="AdamW", lr=0.01)
+
+[graph-pes DEBUG]: 
+Scheduler:
+LRScheduler(
+  name="ReduceLROnPlateau",
+  factor=0.5,
+  patience=10
+)
+
+[graph-pes DEBUG]: 
+Total loss:
+TotalLoss:
+PerAtomEnergyLoss("energy", metric=RMSE())
+ForceRMSE("forces", metric=RMSE())
+
+[graph-pes INFO]: Preparing data
+[graph-pes INFO]: Caching neighbour lists for 436 structures with cutoff 3.7, property mapping None and torch dtype torch.float32
+[graph-pes INFO]: Caching neighbour lists for 54 structures with cutoff 3.7, property mapping None and torch dtype torch.float32
+[graph-pes INFO]: Setting up datasets
+[graph-pes INFO]: Pre-fitting the model on 436 samples
+[graph-pes DEBUG]: Attempting to pre-fit FixedOffset
+[graph-pes DEBUG]: Attempting to pre-fit NequIP
+[graph-pes DEBUG]: Per-element means: {6: -157.91651916503906}
+[graph-pes DEBUG]: Per-element variances: {6: 5.720173358917236}
+[graph-pes DEBUG]: 
+Model:
+AdditionModel(
+  offset=FixedOffset({'C': -148.0}, trainable=False),
+  many-body=NequIP(
+    (Z_embedding): AtomicOneHot(elements=['C'])
+    (initial_node_embedding): PerElementEmbedding(dim=16, elements=['C'])
+    (edge_embedding): SphericalHarmonics(1x1o -> 1x0e+1x1o+1x2e)
+    (layers): UniformModuleList(
+      (0): NequIPMessagePassingLayer(
+        (pre_message_linear): Linear(16x0e -> 16x0e | 256 weights)
+        (message_tensor_product): TensorProduct(16x0e x 1x0e+1x1o+1x2e -> 16x0e+16x1o+16x2e | 48 paths | 48 weights)
+        (weight_generator): HaddamardProduct(
+          (components): ModuleList(
+            (0): Sequential(
+              (0): Bessel(n_features=8, cutoff=3.7, trainable=True)
+              (1): MLP(8 → 8 → 8 → 48, activation=SiLU())
+            )
+            (1): PolynomialEnvelope(cutoff=3.7, p=6)
+          )
+        )
+        (aggregation): SumNeighbours()
+        (non_linearity): Gate (28x0e+8x1o+4x2e -> 16x0e+8x1o+4x2e)
+        (post_message_linear): Linear(16x0e+16x1o+16x2e -> 28x0e+8x1o+4x2e | 640 weights)
+        (self_interaction): LinearSelfInteraction(
+          (linear): Linear(16x0e -> 28x0e+8x1o+4x2e | 448 weights)
+        )
+      )
+      (1): NequIPMessagePassingLayer(
+        (pre_message_linear): Linear(16x0e+8x1o+4x2e -> 16x0e+8x1o+4x2e | 336 weights)
+        (message_tensor_product): TensorProduct(16x0e+8x1o+4x2e x 1x0e+1x1o+1x2e -> 28x0e+36x1o+12x1e+12x2o+32x2e | 120 paths | 120 weights)
+        (weight_generator): HaddamardProduct(
+          (components): ModuleList(
+            (0): Sequential(
+              (0): Bessel(n_features=8, cutoff=3.7, trainable=True)
+              (1): MLP(8 → 8 → 8 → 120, activation=SiLU())
+            )
+            (1): PolynomialEnvelope(cutoff=3.7, p=6)
+          )
+        )
+        (aggregation): SumNeighbours()
+        (non_linearity): Gate (16x0e -> 16x0e)
+        (post_message_linear): Linear(28x0e+36x1o+12x1e+12x2o+32x2e -> 16x0e | 448 weights)
+        (self_interaction): LinearSelfInteraction(
+          (linear): Linear(16x0e+8x1o+4x2e -> 16x0e | 256 weights)
+        )
+      )
+    )
+    (energy_readout): LinearReadOut(16x0e -> 1x0e | 16 weights)
+    (scaler): LocalEnergiesScaler({'C': 2.39}, trainable=True)
+  )
+)
+
+[graph-pes INFO]: 
+Number of learnable params:
+    offset (FixedOffset): 0
+    many-body (NequIP)  : 4,233
+
+[graph-pes INFO]: Sanity checking the model...
+[graph-pes INFO]: Starting fit...
+[graph-pes DEBUG]: 
+Using LR scheduler config:
+{'interval': 'epoch', 'frequency': 1, 'monitor': 'valid/loss/total', 'strict': True}
+
+[graph-pes DEBUG]: New best model: validation loss 9.413460731506348
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 1.5129961967468262
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 1.0091462135314941
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.8907637596130371
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.774631917476654
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.761550784111023
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.6741524338722229
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.6448007225990295
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.627616822719574
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5890544652938843
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5792977213859558
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5769378542900085
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5516260862350464
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5306310057640076
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.5155818462371826
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4968302547931671
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4856213331222534
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.480642169713974
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.47432181239128113
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.47164860367774963
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4662477672100067
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4632444679737091
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.45998072624206543
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.45705413818359375
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.45500314235687256
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4503462016582489
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.44945773482322693
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4486599564552307
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.44697606563568115
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4463355541229248
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4461379647254944
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.444333016872406
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4427635669708252
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4418785274028778
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.44144779443740845
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.440338671207428
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.43988701701164246
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4393537938594818
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.43894362449645996
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4369211196899414
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4366336762905121
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4363483488559723
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4362293481826782
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4361516535282135
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes DEBUG]: New best model: validation loss 0.4361112415790558
+[graph-pes DEBUG]: Model saved to graph-pes-results/train-NequiP/model.pt
+[graph-pes DEBUG]: Deployed model for use with LAMMPS to graph-pes-results/train-NequiP/lammps_model.pt
+[graph-pes INFO]: Loading best weights from "/home/vld-gpu01/vld/sedm6197/Atomistic-ML-Tutorial/Class-2/graph-pes-results/train-NequiP/checkpoints/best.ckpt"
+[graph-pes INFO]: Training complete.
+[graph-pes INFO]: Testing best model...
+[graph-pes INFO]: Testing complete.
+[graph-pes INFO]: Awaiting final Lightning and W&B shutdown...
